@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>French Essentials Quiz</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f7f4ef;
+      --surface: #ffffff;
+      --accent: #3d2fa0;
+      --accent-light: #ece9fc;
+      --text: #1a1a2e;
+      --muted: #6b6880;
+      --border: #e2ddd8;
+      --correct-bg: #eaf3de;
+      --correct-text: #27500a;
+      --correct-border: #639922;
+      --wrong-bg: #fcebeb;
+      --wrong-text: #501313;
+      --wrong-border: #e24b4a;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem 4rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    header .flag { font-size: 2.5rem; margin-bottom: 0.5rem; display: block; }
+
+    header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    header p {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-top: 0.4rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      width: 100%;
+      max-width: 660px;
+    }
+
+    /* ── Start Screen ── */
+    #start-screen h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.35rem;
+      font-weight: 500;
+      margin-bottom: 0.35rem;
+    }
+
+    #start-screen > p {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .filter-label {
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 0.6rem;
+    }
+
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 1.5rem;
+    }
+
+    .filter-btn {
+      padding: 5px 13px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: transparent;
+      color: var(--muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    .settings-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 1.8rem;
+    }
+
+    .settings-row label {
+      font-size: 0.88rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    select {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      padding: 7px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      display: inline-block;
+      padding: 11px 28px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+
+    .btn-primary:hover { opacity: 0.88; }
+    .btn-primary:active { transform: scale(0.98); }
+
+    .btn-ghost {
+      display: inline-block;
+      padding: 10px 20px;
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.15s;
+      margin: 4px;
+    }
+
+    .btn-ghost:hover { background: var(--bg); }
+
+    /* ── Quiz Screen ── */
+    .progress-bar {
+      height: 5px;
+      background: var(--bg);
+      border-radius: 3px;
+      margin-bottom: 1.4rem;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 3px;
+      transition: width 0.4s ease;
+    }
+
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    .category-badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      padding: 3px 10px;
+      background: var(--accent-light);
+      color: var(--accent);
+      border-radius: 999px;
+      margin-bottom: 0.9rem;
+    }
+
+    .question-text {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.05rem, 2.5vw, 1.25rem);
+      font-weight: 500;
+      line-height: 1.55;
+      color: var(--text);
+      margin-bottom: 1.5rem;
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 1.4rem;
+    }
+
+    @media (max-width: 480px) {
+      .options { grid-template-columns: 1fr; }
+    }
+
+    .opt-btn {
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.92rem;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      line-height: 1.4;
+    }
+
+    .opt-btn:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-light); }
+    .opt-btn.correct { background: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-text); }
+    .opt-btn.wrong   { background: var(--wrong-bg);   border-color: var(--wrong-border);   color: var(--wrong-text); }
+    .opt-btn:disabled { cursor: default; }
+
+    .feedback {
+      font-size: 0.88rem;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      margin-bottom: 1rem;
+    }
+
+    .feedback.correct { background: var(--correct-bg); color: var(--correct-text); }
+    .feedback.wrong   { background: var(--wrong-bg);   color: var(--wrong-text); }
+
+    /* ── Score Screen ── */
+    #score-screen { text-align: center; }
+
+    .score-ring {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      background: var(--accent-light);
+      border: 3px solid var(--accent);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.2rem;
+    }
+
+    .score-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 600;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .score-pct {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    #score-screen h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      margin-bottom: 0.4rem;
+    }
+
+    #score-screen p {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+
+    footer {
+      margin-top: 2.5rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <span class="flag">🇫🇷</span>
+    <h1>French Essentials Quiz</h1>
+    <p>500 questions · Lessons 1–20 · Learn French With Alexa</p>
+  </header>
+
+  <div class="card">
+
+    <!-- Start Screen -->
+    <div id="start-screen">
+      <h2>Choose your session</h2>
+      <p>Filter by topic and pick how many questions to answer.</p>
+
+      <div class="filter-label">Topics</div>
+      <div class="filter-bar" id="filter-bar"></div>
+
+      <div class="settings-row">
+        <label for="q-count">Questions:</label>
+        <select id="q-count">
+          <option value="20">20</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+          <option value="500">All 500</option>
+        </select>
+      </div>
+
+      <button class="btn-primary" onclick="startQuiz()">Start quiz →</button>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div id="quiz-screen" style="display:none">
+      <div class="progress-bar"><div class="progress-fill" id="prog"></div></div>
+      <div class="meta">
+        <span id="q-counter"></span>
+        <span id="score-track"></span>
+      </div>
+      <div class="category-badge" id="cat-badge"></div>
+      <div class="question-text" id="q-text"></div>
+      <div class="options" id="options"></div>
+      <div class="feedback" id="feedback" style="display:none"></div>
+      <button class="btn-primary" id="next-btn" style="display:none" onclick="nextQ()">Next →</button>
+    </div>
+
+    <!-- Score Screen -->
+    <div id="score-screen" style="display:none">
+      <div class="score-ring">
+        <div class="score-num" id="final-fraction"></div>
+        <div class="score-pct" id="final-pct"></div>
+      </div>
+      <h2 id="score-msg"></h2>
+      <p id="score-sub"></p>
+      <button class="btn-ghost" onclick="restartSame()">Try again</button>
+      <button class="btn-ghost" onclick="showStart()">Change settings</button>
+    </div>
+
+  </div>
+
+  <footer>Built with ❤️ — French Essentials · Lessons 1–20</footer>
+
+  <script>
+    const ALL = [
+      {c:"Greetings",q:"How do you say 'Hello' in French?",a:"Bonjour",w:["Au revoir","Merci","Bonsoir"]},
+      {c:"Greetings",q:"What does 'Bonsoir' mean?",a:"Good evening",w:["Good morning","Goodbye","How are you?"]},
+      {c:"Greetings",q:"How do you say 'Goodbye' in French?",a:"Au revoir",w:["Bonjour","Merci","S'il vous plaît"]},
+      {c:"Greetings",q:"What does 'Comment ça va?' mean?",a:"How are you?",w:["What is your name?","Where are you from?","How old are you?"]},
+      {c:"Greetings",q:"How do you reply 'Fine, thanks' in French?",a:"Ça va bien, merci",w:["Très bien","Pas mal","Au revoir"]},
+      {c:"Greetings",q:"What does 'Enchanté(e)' mean?",a:"Nice to meet you",w:["Thank you","You're welcome","Excuse me"]},
+      {c:"Greetings",q:"How do you say 'Good morning'?",a:"Bonjour",w:["Bonsoir","Bonne nuit","Salut"]},
+      {c:"Greetings",q:"What does 'Salut' mean?",a:"Hi / Bye (informal)",w:["Thank you","Please","Excuse me"]},
+      {c:"Greetings",q:"How do you say 'Goodnight' in French?",a:"Bonne nuit",w:["Bonsoir","Bonjour","Au revoir"]},
+      {c:"Greetings",q:"What does 'S'il vous plaît' mean?",a:"Please",w:["Thank you","Excuse me","Sorry"]},
+      {c:"Greetings",q:"How do you say 'Thank you very much'?",a:"Merci beaucoup",w:["Merci","De rien","S'il te plaît"]},
+      {c:"Greetings",q:"What does 'De rien' mean?",a:"You're welcome",w:["Please","Sorry","Goodbye"]},
+      {c:"Greetings",q:"How do you say 'Excuse me' (to a stranger)?",a:"Excusez-moi",w:["Pardon","Désolé","S'il vous plaît"]},
+      {c:"Greetings",q:"What does 'Comment vous appelez-vous?' mean?",a:"What is your name? (formal)",w:["How are you?","Where do you live?","How old are you?"]},
+      {c:"Greetings",q:"How do you say 'My name is...' in French?",a:"Je m'appelle...",w:["Je suis...","J'ai...","Je vis..."]},
+      {c:"Greetings",q:"What does 'À bientôt' mean?",a:"See you soon",w:["Good evening","See you later","Goodbye"]},
+      {c:"Greetings",q:"How do you say 'See you tomorrow'?",a:"À demain",w:["À bientôt","À tout à l'heure","À plus"]},
+      {c:"Greetings",q:"What does 'Bienvenue' mean?",a:"Welcome",w:["Goodbye","See you soon","Good luck"]},
+      {c:"Greetings",q:"How do you address someone formally in French?",a:"Vous",w:["Tu","Il","Elle"]},
+      {c:"Greetings",q:"What is the informal way to say 'you'?",a:"Tu",w:["Vous","Il","On"]},
+      {c:"Numbers",q:"What is 'cinq' in English?",a:"5",w:["4","6","7"]},
+      {c:"Numbers",q:"How do you say '13' in French?",a:"Treize",w:["Onze","Douze","Quatorze"]},
+      {c:"Numbers",q:"What is 'dix-sept'?",a:"17",w:["16","18","15"]},
+      {c:"Numbers",q:"How do you say '1' in French?",a:"Un/Une",w:["Deux","Trois","Zéro"]},
+      {c:"Numbers",q:"What is 'vingt' in English?",a:"20",w:["10","15","19"]},
+      {c:"Numbers",q:"How do you say '8' in French?",a:"Huit",w:["Sept","Neuf","Six"]},
+      {c:"Numbers",q:"What is 'quatorze'?",a:"14",w:["13","15","12"]},
+      {c:"Numbers",q:"How do you say '11' in French?",a:"Onze",w:["Douze","Dix","Treize"]},
+      {c:"Numbers",q:"What is 'seize' in English?",a:"16",w:["15","17","18"]},
+      {c:"Numbers",q:"How do you say '3' in French?",a:"Trois",w:["Deux","Quatre","Un"]},
+      {c:"Numbers",q:"What is 'dix-neuf'?",a:"19",w:["18","17","20"]},
+      {c:"Numbers",q:"How do you say '7' in French?",a:"Sept",w:["Six","Huit","Neuf"]},
+      {c:"Numbers",q:"What is 'douze'?",a:"12",w:["11","13","10"]},
+      {c:"Numbers",q:"How do you say '0' in French?",a:"Zéro",w:["Un","Dix","Cent"]},
+      {c:"Numbers",q:"What is 'dix-huit'?",a:"18",w:["17","19","16"]},
+      {c:"Numbers",q:"How do you say '15' in French?",a:"Quinze",w:["Quatorze","Seize","Treize"]},
+      {c:"Numbers",q:"What is 'deux'?",a:"2",w:["1","3","4"]},
+      {c:"Numbers",q:"How do you say '10' in French?",a:"Dix",w:["Onze","Neuf","Huit"]},
+      {c:"Numbers",q:"What is 'six'?",a:"6",w:["5","7","8"]},
+      {c:"Numbers",q:"How do you say '4' in French?",a:"Quatre",w:["Cinq","Trois","Six"]},
+      {c:"Numbers",q:"What is 'neuf' in English?",a:"9",w:["8","10","7"]},
+      {c:"Alphabet",q:"How many letters are in the French alphabet?",a:"26",w:["24","28","25"]},
+      {c:"Alphabet",q:"How is the letter 'J' pronounced in French?",a:"Zhee",w:["Jee","Yee","Djee"]},
+      {c:"Alphabet",q:"How is 'G' pronounced in French (the letter name)?",a:"Zhay",w:["Gay","Guh","Jay"]},
+      {c:"Alphabet",q:"How is the letter 'H' pronounced in French?",a:"Ash",w:["Haitch","Hay","Huh"]},
+      {c:"Alphabet",q:"How is 'W' pronounced in French?",a:"Doobluh-vay",w:["Wee","Doobluh","Vay"]},
+      {c:"Alphabet",q:"How is 'Y' pronounced in French?",a:"Ee-grek",w:["Why","Wee","Ypsilon"]},
+      {c:"Alphabet",q:"How is 'E' pronounced in French?",a:"Euh",w:["Ee","Ay","Eh"]},
+      {c:"Alphabet",q:"How is 'I' pronounced in French?",a:"Ee",w:["Eye","Ih","Euh"]},
+      {c:"Alphabet",q:"How is 'U' pronounced in French?",a:"Ew (like 'tu')",w:["Oo","You","Uh"]},
+      {c:"Alphabet",q:"How is 'C' pronounced in French?",a:"Say",w:["See","Suh","Kay"]},
+      {c:"Alphabet",q:"How is 'K' pronounced in French?",a:"Ka",w:["Kay","Kuh","Ker"]},
+      {c:"Alphabet",q:"How is 'Q' pronounced in French?",a:"Kew",w:["Kay","Kwee","Kuh"]},
+      {c:"Alphabet",q:"How is 'R' pronounced in French?",a:"Ehr",w:["Ar","Ruh","Ray"]},
+      {c:"Alphabet",q:"How is 'Z' pronounced in French?",a:"Zed",w:["Zee","Zay","Zeh"]},
+      {c:"Alphabet",q:"Which letter sounds like 'vay' in French?",a:"V",w:["B","W","F"]},
+      {c:"Alphabet",q:"Which letter sounds like 'eff' in French?",a:"F",w:["S","V","Ph"]},
+      {c:"Alphabet",q:"Which letter sounds like 'beh' in French?",a:"B",w:["P","V","D"]},
+      {c:"Alphabet",q:"Which letter sounds like 'peh' in French?",a:"P",w:["B","F","T"]},
+      {c:"Alphabet",q:"How is 'X' pronounced in French?",a:"Eeks",w:["Ex","Eks","Shh"]},
+      {c:"Alphabet",q:"How is 'N' pronounced in French?",a:"En",w:["Nuh","Enn","Ain"]},
+      {c:"Days",q:"What is Monday in French?",a:"Lundi",w:["Mardi","Mercredi","Dimanche"]},
+      {c:"Days",q:"What is Tuesday in French?",a:"Mardi",w:["Lundi","Jeudi","Vendredi"]},
+      {c:"Days",q:"What is Wednesday in French?",a:"Mercredi",w:["Mardi","Jeudi","Samedi"]},
+      {c:"Days",q:"What is Thursday in French?",a:"Jeudi",w:["Mercredi","Vendredi","Lundi"]},
+      {c:"Days",q:"What is Friday in French?",a:"Vendredi",w:["Jeudi","Samedi","Mardi"]},
+      {c:"Days",q:"What is Saturday in French?",a:"Samedi",w:["Vendredi","Dimanche","Mercredi"]},
+      {c:"Days",q:"What is Sunday in French?",a:"Dimanche",w:["Samedi","Lundi","Jeudi"]},
+      {c:"Days",q:"What does 'Lundi' mean?",a:"Monday",w:["Tuesday","Sunday","Wednesday"]},
+      {c:"Days",q:"What does 'Vendredi' mean?",a:"Friday",w:["Thursday","Saturday","Monday"]},
+      {c:"Days",q:"What does 'Mercredi' mean?",a:"Wednesday",w:["Tuesday","Thursday","Friday"]},
+      {c:"Days",q:"Which day comes after 'Lundi'?",a:"Mardi",w:["Mercredi","Dimanche","Samedi"]},
+      {c:"Days",q:"Which day comes before 'Dimanche'?",a:"Samedi",w:["Vendredi","Lundi","Jeudi"]},
+      {c:"Days",q:"Are days of the week capitalized in French?",a:"No",w:["Yes","Only the first","Only on weekdays"]},
+      {c:"Days",q:"What is the first day of the week in France?",a:"Lundi (Monday)",w:["Dimanche (Sunday)","Samedi (Saturday)","Mardi (Tuesday)"]},
+      {c:"Days",q:"How do you say 'on Monday' in French?",a:"Le lundi",w:["Au lundi","En lundi","De lundi"]},
+      {c:"Days",q:"What does 'Samedi' mean?",a:"Saturday",w:["Sunday","Friday","Monday"]},
+      {c:"Days",q:"What does 'Jeudi' mean?",a:"Thursday",w:["Tuesday","Wednesday","Friday"]},
+      {c:"Days",q:"What does 'Mardi' mean?",a:"Tuesday",w:["Monday","Thursday","Saturday"]},
+      {c:"Days",q:"What does 'Dimanche' mean?",a:"Sunday",w:["Saturday","Monday","Friday"]},
+      {c:"Days",q:"How do you ask 'What day is it today?' in French?",a:"Quel jour sommes-nous?",w:["Quelle heure est-il?","Quel mois sommes-nous?","Quel temps fait-il?"]},
+      {c:"Months",q:"What is January in French?",a:"Janvier",w:["Juin","Juillet","Février"]},
+      {c:"Months",q:"What is February in French?",a:"Février",w:["Janvier","Mars","Avril"]},
+      {c:"Months",q:"What is March in French?",a:"Mars",w:["Mai","Juillet","Août"]},
+      {c:"Months",q:"What is April in French?",a:"Avril",w:["Mars","Mai","Juin"]},
+      {c:"Months",q:"What is May in French?",a:"Mai",w:["Avril","Juin","Mars"]},
+      {c:"Months",q:"What is June in French?",a:"Juin",w:["Mai","Juillet","Août"]},
+      {c:"Months",q:"What is July in French?",a:"Juillet",w:["Juin","Août","Septembre"]},
+      {c:"Months",q:"What is August in French?",a:"Août",w:["Juillet","Septembre","Juin"]},
+      {c:"Months",q:"What is September in French?",a:"Septembre",w:["Août","Octobre","Novembre"]},
+      {c:"Months",q:"What is October in French?",a:"Octobre",w:["Septembre","Novembre","Décembre"]},
+      {c:"Months",q:"What is November in French?",a:"Novembre",w:["Octobre","Décembre","Janvier"]},
+      {c:"Months",q:"What is December in French?",a:"Décembre",w:["Novembre","Octobre","Février"]},
+      {c:"Months",q:"Are months capitalized in French?",a:"No",w:["Yes","Only January","Only December"]},
+      {c:"Months",q:"What does 'Août' mean?",a:"August",w:["June","October","September"]},
+      {c:"Months",q:"How do you say 'in January'?",a:"En janvier",w:["Au janvier","Le janvier","De janvier"]},
+      {c:"Months",q:"What does 'Juillet' mean?",a:"July",w:["June","August","January"]},
+      {c:"Months",q:"Which month is 'Février'?",a:"February",w:["March","January","April"]},
+      {c:"Months",q:"How do you say 'What month is it?'",a:"Quel mois sommes-nous?",w:["Quel jour est-on?","Quelle année?","Quelle heure est-il?"]},
+      {c:"Months",q:"What does 'Décembre' mean?",a:"December",w:["November","October","January"]},
+      {c:"Months",q:"Which month is 'Septembre'?",a:"September",w:["October","August","November"]},
+      {c:"Weather",q:"How do you say 'It is sunny' in French?",a:"Il fait beau",w:["Il pleut","Il neige","Il fait froid"]},
+      {c:"Weather",q:"What does 'Il pleut' mean?",a:"It is raining",w:["It is snowing","It is hot","It is cloudy"]},
+      {c:"Weather",q:"How do you say 'It is cold' in French?",a:"Il fait froid",w:["Il fait chaud","Il neige","Il fait beau"]},
+      {c:"Weather",q:"What does 'Il neige' mean?",a:"It is snowing",w:["It is raining","It is windy","It is cold"]},
+      {c:"Weather",q:"How do you say 'It is hot'?",a:"Il fait chaud",w:["Il fait froid","Il fait beau","Il pleut"]},
+      {c:"Weather",q:"What does 'Il y a du vent' mean?",a:"It is windy",w:["It is foggy","It is sunny","It is cold"]},
+      {c:"Weather",q:"How do you say 'It is cloudy'?",a:"Il y a des nuages",w:["Il fait beau","Il pleut","Il neige"]},
+      {c:"Weather",q:"What is 'le printemps'?",a:"Spring",w:["Summer","Autumn","Winter"]},
+      {c:"Weather",q:"What is 'l'été'?",a:"Summer",w:["Spring","Winter","Autumn"]},
+      {c:"Weather",q:"What is 'l'automne'?",a:"Autumn/Fall",w:["Spring","Summer","Winter"]},
+      {c:"Weather",q:"What is 'l'hiver'?",a:"Winter",w:["Summer","Spring","Autumn"]},
+      {c:"Weather",q:"How do you ask 'What is the weather like?'",a:"Quel temps fait-il?",w:["Quelle heure est-il?","Quel jour est-on?","Où sommes-nous?"]},
+      {c:"Weather",q:"What does 'Il fait beau' literally mean?",a:"The weather is nice",w:["It is sunny","It is good","It is hot"]},
+      {c:"Weather",q:"What does 'Il y a du brouillard' mean?",a:"It is foggy",w:["It is windy","It is snowing","It is cloudy"]},
+      {c:"Weather",q:"Which season follows 'l'hiver'?",a:"Le printemps",w:["L'été","L'automne","Le soleil"]},
+      {c:"Weather",q:"How do you say 'It is warm' in French?",a:"Il fait chaud",w:["Il fait tiède","Il fait doux","Il fait beau"]},
+      {c:"Weather",q:"What does 'Il fait mauvais' mean?",a:"The weather is bad",w:["It is cold","It is raining","It is foggy"]},
+      {c:"Weather",q:"What gender is 'printemps'?",a:"Masculine",w:["Feminine","Neutral","It changes"]},
+      {c:"Weather",q:"What gender is 'automne'?",a:"Masculine",w:["Feminine","It changes","Neutral"]},
+      {c:"Weather",q:"How do you say 'It is stormy'?",a:"Il y a de l'orage",w:["Il pleut fort","Il fait du vent","Il fait froid"]},
+      {c:"Articles",q:"What is the masculine definite article in French?",a:"Le",w:["La","Les","L'"]},
+      {c:"Articles",q:"What is the feminine definite article in French?",a:"La",w:["Le","Les","Des"]},
+      {c:"Articles",q:"When do you use 'L'' instead of 'le' or 'la'?",a:"Before a vowel or silent H",w:["Before consonants","Before plural nouns","Always with feminine nouns"]},
+      {c:"Articles",q:"What is the plural definite article?",a:"Les",w:["Des","Le","La"]},
+      {c:"Articles",q:"What is 'the book' in French? (le/la livre)",a:"Le livre",w:["La livre","Les livres","L'livre"]},
+      {c:"Articles",q:"What is 'the school' in French? (école = f)",a:"L'école",w:["La école","Le école","Les école"]},
+      {c:"Articles",q:"What is the masculine indefinite article?",a:"Un",w:["Une","Des","De"]},
+      {c:"Articles",q:"What is the feminine indefinite article?",a:"Une",w:["Un","Des","La"]},
+      {c:"Articles",q:"What is the plural indefinite article?",a:"Des",w:["Les","Un","Une"]},
+      {c:"Articles",q:"'A cat' in French (chat = m)",a:"Un chat",w:["Une chat","Des chats","Le chat"]},
+      {c:"Articles",q:"'A house' in French (maison = f)",a:"Une maison",w:["Un maison","Des maisons","La maison"]},
+      {c:"Articles",q:"What does 'des' translate to?",a:"Some / (plural a/an)",w:["The","A","Of"]},
+      {c:"Articles",q:"'The books' in French",a:"Les livres",w:["Le livre","Des livres","La livre"]},
+      {c:"Articles",q:"'The water' in French (eau = f)",a:"L'eau",w:["La eau","Le eau","Les eaux"]},
+      {c:"Articles",q:"'A friend (female)' in French (amie = f)",a:"Une amie",w:["Un amie","Des amies","L'amie"]},
+      {c:"Articles",q:"What article goes with 'homme' (man)?",a:"L'homme",w:["Le homme","Un homme","Des hommes"]},
+      {c:"Articles",q:"'Some friends' in French (amis = m pl)",a:"Des amis",w:["Les amis","Un ami","Des amies"]},
+      {c:"Articles",q:"Definite articles are used when referring to...",a:"Specific nouns",w:["Non-specific nouns","Any noun","Abstract ideas only"]},
+      {c:"Articles",q:"Indefinite articles are used when referring to...",a:"Non-specific nouns",w:["Specific nouns","Plural nouns only","Abstract ideas only"]},
+      {c:"Articles",q:"'The children' in French (enfants = m pl)",a:"Les enfants",w:["Des enfants","L'enfants","Le enfant"]},
+      {c:"Pronouns",q:"What is the French subject pronoun for 'I'?",a:"Je",w:["Tu","Il","Nous"]},
+      {c:"Pronouns",q:"What is the French subject pronoun for 'you' (informal)?",a:"Tu",w:["Vous","Je","On"]},
+      {c:"Pronouns",q:"What is the French subject pronoun for 'he'?",a:"Il",w:["Elle","On","Ils"]},
+      {c:"Pronouns",q:"What is the French subject pronoun for 'she'?",a:"Elle",w:["Il","Elles","Nous"]},
+      {c:"Pronouns",q:"What is the French subject pronoun for 'we'?",a:"Nous",w:["Vous","On","Ils"]},
+      {c:"Pronouns",q:"What is the French subject pronoun for 'you' (plural/formal)?",a:"Vous",w:["Nous","Tu","Ils"]},
+      {c:"Pronouns",q:"What is the French subject pronoun for 'they' (masculine)?",a:"Ils",w:["Elles","On","Nous"]},
+      {c:"Pronouns",q:"What is the French subject pronoun for 'they' (feminine)?",a:"Elles",w:["Ils","On","Vous"]},
+      {c:"Pronouns",q:"What does 'on' mean in French?",a:"One / We (informal)",w:["He","She","They"]},
+      {c:"Pronouns",q:"When is 'vous' used?",a:"Formal 'you' or plural 'you'",w:["Only plural","Only formal","Always informal"]},
+      {c:"Pronouns",q:"'Je' contracts to 'j'' before...",a:"A vowel or silent H",w:["A consonant","Any word","End of sentence"]},
+      {c:"Pronouns",q:"Mixed-gender group uses which 'they'?",a:"Ils",w:["Elles","On","Nous"]},
+      {c:"Pronouns",q:"Which pronoun is used informally for 'we' in spoken French?",a:"On",w:["Nous","Vous","Ils"]},
+      {c:"Pronouns",q:"'Il' can refer to...",a:"He or it (masculine noun)",w:["She only","Masculine people only","Any person"]},
+      {c:"Pronouns",q:"'Elle' can refer to...",a:"She or it (feminine noun)",w:["He only","Feminine people only","Any object"]},
+      {c:"Pronouns",q:"All-female group uses which 'they'?",a:"Elles",w:["Ils","On","Nous"]},
+      {c:"Pronouns",q:"Which pronoun replaces 'vous' informally with one friend?",a:"Tu",w:["On","Nous","Je"]},
+      {c:"Pronouns",q:"'Nous' is which person?",a:"First person plural",w:["Second person plural","Third person plural","First person singular"]},
+      {c:"Pronouns",q:"'Ils' is which person?",a:"Third person plural",w:["Second person plural","First person plural","Third person singular"]},
+      {c:"Pronouns",q:"'Tu' is which person?",a:"Second person singular",w:["First person singular","Third person singular","Second person plural"]},
+      {c:"Être & Avoir",q:"What does 'être' mean?",a:"To be",w:["To have","To go","To do"]},
+      {c:"Être & Avoir",q:"What does 'avoir' mean?",a:"To have",w:["To be","To go","To want"]},
+      {c:"Être & Avoir",q:"What is 'je suis'?",a:"I am",w:["I have","I go","I want"]},
+      {c:"Être & Avoir",q:"What is 'tu es'?",a:"You are",w:["You have","You go","You want"]},
+      {c:"Être & Avoir",q:"What is 'il/elle est'?",a:"He/She is",w:["He/She has","He/She goes","He/She was"]},
+      {c:"Être & Avoir",q:"What is 'nous sommes'?",a:"We are",w:["We have","We go","We were"]},
+      {c:"Être & Avoir",q:"What is 'vous êtes'?",a:"You are (pl/formal)",w:["You have","You go","You were"]},
+      {c:"Être & Avoir",q:"What is 'ils/elles sont'?",a:"They are",w:["They have","They go","They were"]},
+      {c:"Être & Avoir",q:"What is 'j'ai'?",a:"I have",w:["I am","I go","I want"]},
+      {c:"Être & Avoir",q:"What is 'tu as'?",a:"You have",w:["You are","You go","You want"]},
+      {c:"Être & Avoir",q:"What is 'il/elle a'?",a:"He/She has",w:["He/She is","He/She goes","He/She had"]},
+      {c:"Être & Avoir",q:"What is 'nous avons'?",a:"We have",w:["We are","We go","We had"]},
+      {c:"Être & Avoir",q:"What is 'vous avez'?",a:"You have (pl/formal)",w:["You are","You go","You had"]},
+      {c:"Être & Avoir",q:"What is 'ils/elles ont'?",a:"They have",w:["They are","They go","They had"]},
+      {c:"Être & Avoir",q:"How do you say 'I am happy'?",a:"Je suis content(e)",w:["J'ai content","Je vais content","J'ai été content"]},
+      {c:"Être & Avoir",q:"How do you say 'I am 20 years old'?",a:"J'ai vingt ans",w:["Je suis vingt ans","J'ai vingt années","Je suis vingt"]},
+      {c:"Être & Avoir",q:"'Avoir' is used for age. How do you say 'She is 5 years old'?",a:"Elle a cinq ans",w:["Elle est cinq ans","Elle a cinq années","Elle est cinq"]},
+      {c:"Être & Avoir",q:"How do you say 'He is a doctor'?",a:"Il est médecin",w:["Il a médecin","Il va médecin","Il fait médecin"]},
+      {c:"Être & Avoir",q:"How do you say 'We have a car'?",a:"Nous avons une voiture",w:["Nous sommes une voiture","Nous allons une voiture","Nous avons le voiture"]},
+      {c:"Être & Avoir",q:"How do you say 'They are French'?",a:"Ils sont français",w:["Ils ont français","Ils vont français","Ils font français"]},
+      {c:"Aller & Prepositions",q:"What does 'aller' mean?",a:"To go",w:["To have","To be","To do"]},
+      {c:"Aller & Prepositions",q:"What is 'je vais'?",a:"I go / I am going",w:["I have","I am","I want"]},
+      {c:"Aller & Prepositions",q:"What is 'tu vas'?",a:"You go",w:["You are","You have","You want"]},
+      {c:"Aller & Prepositions",q:"What is 'il/elle va'?",a:"He/She goes",w:["He/She is","He/She has","He/She goes away"]},
+      {c:"Aller & Prepositions",q:"What is 'nous allons'?",a:"We go",w:["We are","We have","We went"]},
+      {c:"Aller & Prepositions",q:"What is 'vous allez'?",a:"You go (pl/formal)",w:["You are","You have","You went"]},
+      {c:"Aller & Prepositions",q:"What is 'ils/elles vont'?",a:"They go",w:["They are","They have","They went"]},
+      {c:"Aller & Prepositions",q:"What preposition is used with 'aller' + a city?",a:"À",w:["En","De","Au"]},
+      {c:"Aller & Prepositions",q:"How do you say 'I am going to Paris'?",a:"Je vais à Paris",w:["Je vais en Paris","Je vais de Paris","Je vais au Paris"]},
+      {c:"Aller & Prepositions",q:"What preposition is used with 'aller' + feminine country?",a:"En",w:["À","Au","De"]},
+      {c:"Aller & Prepositions",q:"How do you say 'She is going to France'?",a:"Elle va en France",w:["Elle va à France","Elle va au France","Elle va de France"]},
+      {c:"Aller & Prepositions",q:"What preposition is used with 'aller' + masculine country?",a:"Au",w:["En","À","De"]},
+      {c:"Aller & Prepositions",q:"How do you say 'We are going to Canada'?",a:"Nous allons au Canada",w:["Nous allons à Canada","Nous allons en Canada","Nous allons de Canada"]},
+      {c:"Aller & Prepositions",q:"'Aller' + infinitive expresses...",a:"Near future",w:["Past actions","Conditions","Commands"]},
+      {c:"Aller & Prepositions",q:"How do you say 'I am going to eat'?",a:"Je vais manger",w:["Je vais à manger","Je vais mangé","Je mange vais"]},
+      {c:"Aller & Prepositions",q:"What does 'à' mean?",a:"To / At / In",w:["From","With","By"]},
+      {c:"Aller & Prepositions",q:"What does 'de' mean?",a:"Of / From",w:["To","In","With"]},
+      {c:"Aller & Prepositions",q:"What does 'dans' mean?",a:"In (inside)",w:["On","Under","At"]},
+      {c:"Aller & Prepositions",q:"What does 'sur' mean?",a:"On",w:["Under","In","Near"]},
+      {c:"Aller & Prepositions",q:"What does 'sous' mean?",a:"Under",w:["On","In","Next to"]},
+      {c:"Prepositions",q:"What does 'devant' mean?",a:"In front of",w:["Behind","Next to","Between"]},
+      {c:"Prepositions",q:"What does 'derrière' mean?",a:"Behind",w:["In front of","Near","Between"]},
+      {c:"Prepositions",q:"What does 'à côté de' mean?",a:"Next to",w:["In front of","Behind","Between"]},
+      {c:"Prepositions",q:"What does 'entre' mean?",a:"Between",w:["Among","Near","In front of"]},
+      {c:"Prepositions",q:"What does 'près de' mean?",a:"Near",w:["Far from","Next to","On top of"]},
+      {c:"Prepositions",q:"What does 'loin de' mean?",a:"Far from",w:["Near","Next to","Between"]},
+      {c:"Prepositions",q:"What does 'en face de' mean?",a:"Opposite / Facing",w:["Next to","Between","Behind"]},
+      {c:"Prepositions",q:"What does 'chez' mean?",a:"At someone's place",w:["In","With","To"]},
+      {c:"Prepositions",q:"How do you say 'at John's house'?",a:"Chez John",w:["Dans John","À la John","En John"]},
+      {c:"Prepositions",q:"What does 'avec' mean?",a:"With",w:["Without","Against","From"]},
+      {c:"Prepositions",q:"What does 'sans' mean?",a:"Without",w:["With","Against","Between"]},
+      {c:"Prepositions",q:"What does 'pour' mean?",a:"For",w:["Against","With","From"]},
+      {c:"Prepositions",q:"What does 'par' mean?",a:"By / Through",w:["For","With","From"]},
+      {c:"Prepositions",q:"What does 'vers' mean?",a:"Towards",w:["Away from","Against","At"]},
+      {c:"Prepositions",q:"What does 'jusqu'à' mean?",a:"Until / Up to",w:["From","At","Towards"]},
+      {c:"Prepositions",q:"How do you say 'The cat is under the table'?",a:"Le chat est sous la table",w:["Le chat est sur la table","Le chat est dans la table","Le chat est derrière la table"]},
+      {c:"Prepositions",q:"How do you say 'The book is on the desk'?",a:"Le livre est sur le bureau",w:["Le livre est sous le bureau","Le livre est dans le bureau","Le livre est devant le bureau"]},
+      {c:"Prepositions",q:"'Au' is a contraction of...",a:"À + le",w:["À + la","De + le","De + les"]},
+      {c:"Prepositions",q:"'Aux' is a contraction of...",a:"À + les",w:["À + le","De + les","De + la"]},
+      {c:"Prepositions",q:"'Du' is a contraction of...",a:"De + le",w:["De + la","À + le","À + les"]},
+      {c:"Negation",q:"How do you make a sentence negative in French?",a:"Add ne...pas around the verb",w:["Add pas after the verb","Add non before the verb","Add ne before the verb"]},
+      {c:"Negation",q:"How do you say 'I don't speak French'?",a:"Je ne parle pas français",w:["Je parle pas français","Je ne français parle","Je pas parle français"]},
+      {c:"Negation",q:"In spoken French, 'ne' is often...",a:"Dropped",w:["Emphasized","Replaced by 'non'","Moved to end"]},
+      {c:"Negation",q:"How do you say 'He doesn't eat meat'?",a:"Il ne mange pas de viande",w:["Il ne mange pas la viande","Il mange pas viande","Il ne pas mange viande"]},
+      {c:"Negation",q:"What does 'ne...jamais' mean?",a:"Never",w:["Always","Not anymore","Not yet"]},
+      {c:"Negation",q:"What does 'ne...plus' mean?",a:"No longer / Not anymore",w:["Never","Not yet","Still not"]},
+      {c:"Negation",q:"What does 'ne...rien' mean?",a:"Nothing",w:["Not at all","Never","Nobody"]},
+      {c:"Negation",q:"What does 'ne...personne' mean?",a:"Nobody",w:["Nothing","Never","Nowhere"]},
+      {c:"Negation",q:"How do you say 'I never eat cheese'?",a:"Je ne mange jamais de fromage",w:["Je ne mange pas de fromage","Je ne mange plus de fromage","Je mange jamais fromage"]},
+      {c:"Negation",q:"How do you say 'She is no longer here'?",a:"Elle n'est plus là",w:["Elle n'est jamais là","Elle n'est pas là","Elle n'est rien là"]},
+      {c:"Negation",q:"How do you say 'I don't understand anything'?",a:"Je ne comprends rien",w:["Je ne comprends jamais","Je ne comprends personne","Je ne comprends pas"]},
+      {c:"Negation",q:"What article replaces 'un/une/des' after negation?",a:"De / d'",w:["Le/La","Les","Un/Une"]},
+      {c:"Negation",q:"How do you say 'I don't have a car'?",a:"Je n'ai pas de voiture",w:["Je n'ai pas une voiture","Je n'ai pas la voiture","Je n'ai pas des voitures"]},
+      {c:"Negation",q:"What is the negative of 'J'ai faim' (I am hungry)?",a:"Je n'ai pas faim",w:["Je ne suis pas faim","Je n'ai faim pas","Je suis pas faim"]},
+      {c:"Negation",q:"'Ne' becomes 'n'' before...",a:"A vowel or silent H",w:["Any word","A consonant","End of sentence"]},
+      {c:"Negation",q:"How do you say 'We don't know'?",a:"Nous ne savons pas",w:["Nous savons pas","Nous ne pas savons","Nous pas savons"]},
+      {c:"Negation",q:"How do you say 'They no longer work here'?",a:"Ils ne travaillent plus ici",w:["Ils ne travaillent jamais ici","Ils ne travaillent pas ici","Ils travaillent plus ici"]},
+      {c:"Negation",q:"What does 'ne...que' mean?",a:"Only",w:["Never","Nothing","Not much"]},
+      {c:"Negation",q:"How do you say 'I only eat vegetables'?",a:"Je ne mange que des légumes",w:["Je ne mange pas légumes","Je ne mange rien légumes","Je mange que légumes"]},
+      {c:"Time",q:"How do you ask 'What time is it?' in French?",a:"Quelle heure est-il?",w:["Quel temps fait-il?","Quel jour est-on?","Quelle heure est-ce?"]},
+      {c:"Time",q:"How do you say 'It is 1 o'clock'?",a:"Il est une heure",w:["Il est un heure","Il est une heures","Il fait une heure"]},
+      {c:"Time",q:"How do you say 'It is 2 o'clock'?",a:"Il est deux heures",w:["Il est deux heure","Il fait deux heures","C'est deux heures"]},
+      {c:"Time",q:"How do you say 'half past' in French?",a:"Et demie",w:["Et demi","Et quart","Moins le quart"]},
+      {c:"Time",q:"How do you say 'quarter past' in French?",a:"Et quart",w:["Et demie","Moins le quart","Et demi"]},
+      {c:"Time",q:"How do you say 'quarter to' in French?",a:"Moins le quart",w:["Et quart","Moins quart","Et moins le quart"]},
+      {c:"Time",q:"How do you say '3:30' in French?",a:"Il est trois heures et demie",w:["Il est trois heures et quart","Il est trois heures trente","Il est trois et demie"]},
+      {c:"Time",q:"How do you say '4:15' in French?",a:"Il est quatre heures et quart",w:["Il est quatre heures quinze","Il est quatre quart","Il est quatre heures moins quart"]},
+      {c:"Time",q:"How do you say '5:45' in French?",a:"Il est six heures moins le quart",w:["Il est cinq heures et quart","Il est cinq heures quarante-cinq","Il est six heures et quart"]},
+      {c:"Time",q:"What does 'midi' mean?",a:"Noon / Midday",w:["Midnight","Evening","Morning"]},
+      {c:"Time",q:"What does 'minuit' mean?",a:"Midnight",w:["Noon","Evening","Night"]},
+      {c:"Time",q:"France uses which time format officially?",a:"24-hour (e.g. 14h30)",w:["12-hour (AM/PM)","Both equally","10-hour"]},
+      {c:"Time",q:"How do you say 'in the morning'?",a:"Du matin",w:["De soir","De l'après-midi","Du midi"]},
+      {c:"Time",q:"How do you say 'in the afternoon'?",a:"De l'après-midi",w:["Du matin","Du soir","Du midi"]},
+      {c:"Time",q:"How do you say 'in the evening'?",a:"Du soir",w:["Du matin","De l'après-midi","De la nuit"]},
+      {c:"Time",q:"How do you say '8:00 AM'?",a:"Il est huit heures du matin",w:["Il est huit heures","Il est huit heures du soir","Il est vingt heures"]},
+      {c:"Time",q:"How do you say 'It is noon'?",a:"Il est midi",w:["Il est minuit","Il est douze heures","Il est midi et demi"]},
+      {c:"Time",q:"How do you say 'It is midnight'?",a:"Il est minuit",w:["Il est midi","Il est zéro heure","Il est nuit"]},
+      {c:"Time",q:"How do you say '10 minutes past 3'?",a:"Il est trois heures dix",w:["Il est dix heures trois","Il est trois moins dix","Il est trois heures moins dix"]},
+      {c:"Time",q:"How do you say '20 minutes to 9'?",a:"Il est neuf heures moins vingt",w:["Il est huit heures vingt","Il est neuf heures vingt","Il est neuf moins vingt"]},
+      {c:"Accents",q:"What is the name of the accent 'é'?",a:"Accent aigu",w:["Accent grave","Accent circonflexe","Cédille"]},
+      {c:"Accents",q:"What is the name of the accent 'è'?",a:"Accent grave",w:["Accent aigu","Accent circonflexe","Tréma"]},
+      {c:"Accents",q:"What is the name of the accent 'ê'?",a:"Accent circonflexe",w:["Accent aigu","Accent grave","Tréma"]},
+      {c:"Accents",q:"What is the name of the accent 'ï'?",a:"Tréma",w:["Accent aigu","Accent grave","Cédille"]},
+      {c:"Accents",q:"What is the name of the symbol 'ç'?",a:"Cédille",w:["Tréma","Accent grave","Accent aigu"]},
+      {c:"Accents",q:"On which vowels can the accent aigu appear?",a:"E only",w:["A, E, I, O, U","A, E","E, U"]},
+      {c:"Accents",q:"On which vowels can the accent grave appear?",a:"A, E, U",w:["E only","A, E, I, O, U","E, O, U"]},
+      {c:"Accents",q:"On which vowels can the accent circonflexe appear?",a:"A, E, I, O, U",w:["E only","A, E","A, E, U"]},
+      {c:"Accents",q:"The cédille changes the sound of 'c' to...",a:"S (before a, o, u)",w:["K","Sh","Z"]},
+      {c:"Accents",q:"The tréma indicates...",a:"Each vowel is pronounced separately",w:["A nasal sound","A silent vowel","A long vowel"]},
+      {c:"Accents",q:"'É' sounds like...",a:"'ay' as in 'say'",w:["'eh' as in 'pet'","'ee' as in 'see'","'uh' as in 'up'"]},
+      {c:"Accents",q:"'È' sounds like...",a:"'eh' as in 'pet'",w:["'ay' as in 'say'","'ee' as in 'see'","'uh' as in 'up'"]},
+      {c:"Accents",q:"The word 'café' contains which accent?",a:"Accent aigu (é)",w:["Accent grave","Accent circonflexe","Cédille"]},
+      {c:"Accents",q:"The word 'voilà' contains which accent?",a:"Accent grave (à)",w:["Accent aigu","Accent circonflexe","Tréma"]},
+      {c:"Accents",q:"The word 'forêt' (forest) contains which accent?",a:"Accent circonflexe (ê)",w:["Accent aigu","Accent grave","Tréma"]},
+      {c:"Accents",q:"The word 'naïf' (naive) contains which accent?",a:"Tréma (ï)",w:["Accent aigu","Accent grave","Cédille"]},
+      {c:"Accents",q:"The word 'façade' contains which accent?",a:"Cédille (ç)",w:["Accent aigu","Accent grave","Tréma"]},
+      {c:"Accents",q:"Does the accent circonflexe usually change pronunciation significantly?",a:"Not always — mostly historical",w:["Yes, always","It always makes vowel longer","It always makes vowel shorter"]},
+      {c:"Accents",q:"What did the accent circonflexe often replace historically?",a:"A silent 'S' from Latin",w:["A double vowel","An accent grave","A final 'e'"]},
+      {c:"Accents",q:"'Où' (where) vs 'ou' (or) — the accent on 'où' is...",a:"Accent grave — distinguishes meaning",w:["Accent aigu","Tréma","Cédille"]},
+    ];
+
+    const CATS = [...new Set(ALL.map(q => q.c))];
+    let activeFilters = new Set(CATS);
+    let currentSet = [], idx = 0, score = 0, answered = false;
+
+    function buildFilters() {
+      const bar = document.getElementById('filter-bar');
+      bar.innerHTML = '';
+      const allBtn = document.createElement('button');
+      allBtn.className = 'filter-btn active';
+      allBtn.id = 'filter-all';
+      allBtn.textContent = 'All topics';
+      allBtn.onclick = () => { activeFilters = new Set(CATS); updateFilters(); };
+      bar.appendChild(allBtn);
+      CATS.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.className = 'filter-btn active';
+        btn.dataset.cat = cat;
+        btn.textContent = cat;
+        btn.onclick = () => {
+          if (activeFilters.has(cat)) { if (activeFilters.size > 1) activeFilters.delete(cat); }
+          else activeFilters.add(cat);
+          updateFilters();
+        };
+        bar.appendChild(btn);
+      });
+    }
+
+    function updateFilters() {
+      const allActive = activeFilters.size === CATS.length;
+      document.getElementById('filter-all').className = 'filter-btn' + (allActive ? ' active' : '');
+      CATS.forEach(cat => {
+        const btn = document.querySelector(`[data-cat="${cat}"]`);
+        if (btn) btn.className = 'filter-btn' + (activeFilters.has(cat) ? ' active' : '');
+      });
+    }
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function startQuiz() {
+      const count = parseInt(document.getElementById('q-count').value);
+      const pool = shuffle(ALL.filter(q => activeFilters.has(q.c)));
+      currentSet = pool.slice(0, Math.min(count, pool.length));
+      idx = 0; score = 0;
+      document.getElementById('start-screen').style.display = 'none';
+      document.getElementById('score-screen').style.display = 'none';
+      document.getElementById('quiz-screen').style.display = 'block';
+      showQ();
+    }
+
+    function showQ() {
+      answered = false;
+      const q = currentSet[idx];
+      const total = currentSet.length;
+      document.getElementById('prog').style.width = (idx / total * 100) + '%';
+      document.getElementById('q-counter').textContent = `Question ${idx + 1} of ${total}`;
+      document.getElementById('score-track').textContent = `Score: ${score}/${idx}`;
+      document.getElementById('cat-badge').textContent = q.c;
+      document.getElementById('q-text').textContent = q.q;
+      document.getElementById('feedback').style.display = 'none';
+      document.getElementById('next-btn').style.display = 'none';
+      const opts = shuffle([q.a, ...q.w]);
+      const container = document.getElementById('options');
+      container.innerHTML = '';
+      opts.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'opt-btn';
+        btn.textContent = opt;
+        btn.onclick = () => selectAnswer(opt, q.a, btn);
+        container.appendChild(btn);
+      });
+    }
+
+    function selectAnswer(chosen, correct, btn) {
+      if (answered) return;
+      answered = true;
+      document.querySelectorAll('.opt-btn').forEach(b => {
+        b.disabled = true;
+        if (b.textContent === correct) b.classList.add('correct');
+      });
+      const fb = document.getElementById('feedback');
+      if (chosen === correct) {
+        score++;
+        btn.classList.add('correct');
+        fb.className = 'feedback correct';
+        fb.textContent = '✓ Correct!';
+      } else {
+        btn.classList.add('wrong');
+        fb.className = 'feedback wrong';
+        fb.textContent = `✗ The correct answer is: ${correct}`;
+      }
+      fb.style.display = 'block';
+      document.getElementById('next-btn').style.display = 'inline-block';
+      document.getElementById('score-track').textContent = `Score: ${score}/${idx + 1}`;
+    }
+
+    function nextQ() {
+      idx++;
+      if (idx >= currentSet.length) { showScore(); return; }
+      showQ();
+    }
+
+    function showScore() {
+      document.getElementById('quiz-screen').style.display = 'none';
+      document.getElementById('score-screen').style.display = 'block';
+      const pct = Math.round(score / currentSet.length * 100);
+      document.getElementById('final-fraction').textContent = `${score}/${currentSet.length}`;
+      document.getElementById('final-pct').textContent = `${pct}%`;
+      const msgs = [
+        [80, "Excellent work! 🎉", "You have a strong grasp of these topics. Keep it up!"],
+        [60, "Good effort! 👍", "You're making progress — review the tricky ones and try again."],
+        [0,  "Keep studying! 📚", "French takes practice. Review your lessons and come back."],
+      ];
+      const [, h, s] = msgs.find(([min]) => pct >= min);
+      document.getElementById('score-msg').textContent = h;
+      document.getElementById('score-sub').textContent = s;
+      document.getElementById('prog').style.width = '100%';
+    }
+
+    function restartSame() { startQuiz(); }
+    function showStart() {
+      document.getElementById('score-screen').style.display = 'none';
+      document.getElementById('quiz-screen').style.display = 'none';
+      document.getElementById('start-screen').style.display = 'block';
+    }
+
+    buildFilters();
+  </script>
+</body>
+</html>
